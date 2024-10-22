@@ -1,91 +1,106 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+  <div id="app">
+    <header>
+      <nav class="navbar">
+        <div class="logo">
+          <img
+            src="https://www.pfizer.at/images/custom/Pfizer_Logo_Color_RGB.png"
+            alt="Pfizer logo"
+          />
+        </div>
       </nav>
+    </header>
+    <div class="container">
+      <h1 class="title">TODO LIST</h1>
+      <hr />
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Add item..."
+          v-model="userInput"
+          @keyup.enter="addItem"
+        />
+        <button class="btn btn-success" @click="addItem">ADD</button>
+      </div>
+      <div class="todo-table">
+        <div class="table-header">
+          <div class="table-cell">Task</div>
+          <div class="table-cell">Actions</div>
+        </div>
+        <div class="table-body">
+          <div
+            class="table-row"
+            v-for="(item, index) in filteredList"
+            :key="index"
+            :class="{ 'even-row': index % 2 === 0, completed: item.completed }"
+          >
+            <div
+              class="table-cell"
+              :class="{ 'completed-cell': item.completed }"
+            >
+              {{ item.value }}
+            </div>
+            <div class="table-cell">
+              <button class="btn btn-primary" @click="toggleCompleted(index)">
+                {{ item.completed ? 'Undo' : 'Complete' }}
+              </button>
+              <button class="btn btn-info" @click="editItem(index)">
+                Edit
+              </button>
+              <button class="btn btn-danger" @click="deleteItem(index)">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </header>
-
-  <RouterView />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<script>
+export default {
+  name: 'App',
+  data() {
+    return {
+      userInput: '',
+      searchInput: '',
+      list: [],
+    }
+  },
+  computed: {
+    filteredList() {
+      return this.list.filter(item =>
+        item.value.toLowerCase().includes(this.searchInput.toLowerCase()),
+      )
+    },
+  },
+  methods: {
+    addItem() {
+      if (this.userInput.trim() !== '') {
+        const newItem = {
+          id: Math.random(),
+          value: this.userInput.trim(),
+          completed: false,
+        }
+        this.list.push(newItem)
+        this.userInput = ''
+      }
+    },
+    deleteItem(index) {
+      this.list.splice(index, 1)
+    },
+    editItem(index) {
+      const editedTodo = prompt('Edit the todo:')
+      if (editedTodo !== null && editedTodo.trim() !== '') {
+        this.list[index].value = editedTodo.trim()
+      }
+    },
+    toggleCompleted(index) {
+      this.list[index].completed = !this.list[index].completed
+    },
+  },
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
+</script>
+<style src="src/style.css"></style>
